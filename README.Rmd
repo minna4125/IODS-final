@@ -1,0 +1,9 @@
+---
+title: "Readme"
+author: "Minna Perälampi"
+date: "27 helmikuuta 2017"
+output: html_document
+---
+
+Final assingment in IODS-course
+<https://minna4125.github.io/IODS-final/>
