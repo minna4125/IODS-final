@@ -1,7 +1,7 @@
 ---
 title: "Readme"
 author: "Minna Peralampi"
-date: "27 helmikuuta 2017"
+date: "8.3.2017"
 output: html_document
 ---
 

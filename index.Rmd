@@ -1,6 +1,11 @@
 ---
-title: Final assingment
+title: Anime recomendation with clustering and MCA analysis
 author: "Minna Peralampi"
 date: "27 helmikuuta 2017"
+email: minna.peralampi@helsinki.fi
 output: html_document
 ---
+
+#Research questions
+#### Can we predict which animes person is going to like based on this data?
+#### My hypothesis is that by predicting users rating based on his/hers previous watch and rating history is going to give better match between a watcher and the anime than just guessing.
