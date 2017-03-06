@@ -1,21 +1,24 @@
----
-title: Anime recomendation with clustering and MCA analysis
-author: "Minna Peralampi"
-date: "27 helmikuuta 2017"
-email: minna.peralampi@helsinki.fi
-output: html_document
 
---
+---
+title: "Anime recomendation with clustering and MCA analysis"
+author: "Minna Peralampi"
+date: "8.3.2017"
+email: "minna.peralampi@helsinki.fi"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
 
 #Research questions
-#### Can we predict with chosen variables wether anime is being liked or not?
-#### 
+#####Can we predict if the anime is popular based on the variables?
 
 ##Link to the R-script
 <https://github.com/minna4125/IODS-final/blob/master/create_anime.R>
 
        
-## The data
+#The data
 #### The data is downloaded from kaggele (2.3.2017).
 <https://www.kaggle.com/CooperUnion/anime-recommendations-database>
 It orgins from myanimelist.net website.
@@ -36,7 +39,7 @@ Data modification
   3. Anime names were made to a rownames
   4. Rating was made into a binomial variable
   
-#VARIABLE PICTURES
+#Variables
 
     #Downloading the data
     setwd("C:/Users/Minna/Documents/GitHub/IODS-final")
