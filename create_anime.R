@@ -5,7 +5,7 @@
 #Data wrangling for Introduction to Open Data science final assingment
 
 
-setwd("C:/Users/Minna/Documents/GitHub/IODS-final/IODS-final")
+setwd("C:/Users/Minna/Documents/GitHub/IODS-final")
 
 #Libraries needed
 library(tidyr) 

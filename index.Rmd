@@ -12,6 +12,7 @@ output: html_document
 #### 
 
 ##Link to the R-script
+<https://github.com/minna4125/IODS-final/blob/master/create_anime.R>
 
        
 ## The data
@@ -26,18 +27,19 @@ Variables in the data:
 3. members is the number of people in the animes "fan group"
 4. genre_clusters is the number of cluster that the animes genres belong to [1-8].
   - Why? There was over 2000 unique genre combinations of the 44 genres. Putting them into groups by clustering made it a resonable variable to look into.
-
+5. Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
 
 
 Data modification
   1. Animes with NA values were removed (such as animes with no genre or type)
   2. 44 genres were reduced to 8 clusters 
   3. Anime names were made to a rownames
+  4. Rating was made into a binomial variable
   
 #VARIABLE PICTURES
 
     #Downloading the data
-    setwd("C:/Users/Minna/Documents/GitHub/IODS-final/IODS-final")
+    setwd("C:/Users/Minna/Documents/GitHub/IODS-final")
     anime <- read.csv("anime_gen")
     #Drawing the type variable
     counts <- table(anime$rating, anime$type)
@@ -46,9 +48,19 @@ Data modification
     
 ![](anime_types2.png)
 
+
     #Drawing the episodes variable
     library(ggplot2)
-    g <- anime %>% 
-    mutate(episodes = as.numeric(episodes)) %>% 
-    ggplot(aes(episodes, rating) +
-    geom_point(aes(color = type)
+    a <- anime %>% 
+    ggplot(aes(rating, episodes)) +
+    coord_cartesian(xlim = c(-1, 2))+
+    ggplot(aes(color = type)) +  geom_bar(aes(fill = cut))+
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank())
+    facet_wrap(~ type, scales = "free_y")
+    
+   
+    plot(a)
+  
+![](anime_episodes.png)
