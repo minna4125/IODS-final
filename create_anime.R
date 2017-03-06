@@ -1,73 +1,93 @@
+
 #Minna Perälampi
 #minna.peralampi@helsinki.fi
 #2.3.2017
 #Data wrangling for Introduction to Open Data science final assingment
 
 
-setwd("C:/Users/Minna/Documents/GitHub/IODS-final")
+setwd("C:/Users/Minna/Documents/GitHub/IODS-final/IODS-final")
 
 #Libraries needed
-library(tidyr); library(dplyr); library(ggplot2); library(corrplot)
+library(tidyr) 
+library(dplyr)
 
-#Reading the anime rating table
+#Reading the anime table
 anime <- read.csv("anime.csv", stringsAsFactors = F )
 
 
-
-#Exploring the data set dimensions and variables
+#Exploring the data set
 summary(anime)
 dim(anime)
+str(anime)
+
+#Removing rows with NA values from the table
+anime_ <- filter(anime, complete.cases(anime))
+
+#Making a genre matrix that will replace genre variable
 
 
-#Creating new columns for each genre
-
-  #Changing genres name to lower case 
-  anime_$genre <- tolower(anime_$genre)
+#Changing genres name to lower case 
+anime_$genre <- tolower(anime_$genre)
 
 
+#Creating a new vector with all the genres
+genreslist <- strsplit(anime_$genre, ", ", perl=TRUE)
+genres <- unique(unlist(genreslist))
+genres
 
-  #Creating a new vector with all the genres
-    genreslist <- strsplit(anime_$genre, ", ", perl=TRUE)
-    genres <- unique(unlist(genreslist))
-    genres
-  
-  
-  #Making a genre matrix
-    genrematrix <- matrix(0, nrow(anime_), length(genres))
-    colnames(genrematrix) <- genres
-    for (i in 1:nrow(anime_)) {
-      genrematrix[i, ] <- genres %in% genreslist[[i]]
-    }
 
-  #Combinin genre matrix with anime_ table to anime_gen  
-    anime_gen <- cbind(anime_, genrematrix)
-  
-  #Checking
-    glimpse(anime_gen)
+#Making a genre matrix
+genrematrix <- matrix(0, nrow(anime_), length(genres))
+colnames(genrematrix) <- genres
+for (i in 1:nrow(anime_)) {
+  genrematrix[i, ] <- genres %in% genreslist[[i]]
+}
 
-#Removing the genre list variable from the anime_gen
-  anime_gen <- subset(anime_gen, select = -genre)
+#Making genres groups by clustering
+
+clusters <- kmeans(genrematrix, centers=7, nstart=30, iter.max=10000)
+
+
+#Combinin genre matrix with anime_ table to anime_gen  
+anime_gen <- cbind(anime_, "genre_cluster" = clusters$cluster)
 
 #Checking
-  glimpse(anime_gen)
-
-  
-######
-  g <- anime_gen %>% 
-    filter(!is.na(type)) %>%
-    ggplot(aes(episodes, rating)) +
-    geom_point(aes(color = type)) +
-    facet_wrap(~ type, scales = "free_x")
-
-  plot(g)
+glimpse(anime_gen)
 
 
- 
-dist_eu <- dist(anime_gen)
+#Removing the genre  variable from the anime_gen
+anime_gen <- subset(anime_gen, select = -genre)
 
-plot(dist_eu)
+glimpse(anime_gen)
 
 
+#Then we make ratings to a factor variable with categories of like, doesn't like and neutral
+
+anime_gen$rating[anime_gen$rating < 7.5 ] <- "0"
+anime_gen$rating[anime_gen$rating == 7.5 ] <- "0"
+anime_gen$rating[anime_gen$rating > 7.5 ] <- "1"
+
+anime_gen$rating <- as.numeric(anime_gen$rating)
+
+#Changing the type form character to a factor
+anime_gen$type <- as.factor(anime_gen$type)
+
+#changing episodes from charactor to numeric
+anime_gen$episodes <- as.numeric(anime_gen$episodes)
+
+#Making the anime ids as row names
+rownames(anime_gen) <- anime_gen[anime_gen$anime_id]
+
+#Removing the anime id variable and the name variable
+anime_gen <- select(anime_gen, -anime_id)
+
+
+
+glimpse(anime_gen)
+write.csv(anime_gen, "anime_gen")
+##################
+m <- glm(rating ~ episodes+type+members+genre_cluster, data = anime_gen)
+summary(m)
 
 
 
