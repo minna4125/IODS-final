@@ -28,8 +28,7 @@ Variables in the data:
 1. type is a factor variable which has values [Movie, TV, OVA, ONA, Special, TV]
 2. episodes, which is the number of episodes anime has.
 3. members is the number of people in the animes "fan group"
-4. genre_clusters is the number of cluster that the animes genres belong to [1-8].
-  - Why? There was over 2000 unique genre combinations of the 44 genres. Putting them into groups by clustering made it a resonable variable to look into.
+4. genre_clusters is the number of cluster that the animes genres belong to [1-7].
 5. Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
 
 
@@ -44,6 +43,8 @@ Data modification
     #Downloading the data
     setwd("C:/Users/Minna/Documents/GitHub/IODS-final")
     anime <- read.csv("anime_gen")
+    #Removing empty values
+    anime <- filter(anime, complete.cases(anime))
     #Drawing the type variable
     counts <- table(anime$rating, anime$type)
     barplot(counts , main="Anime types", xlab = "Purple = liked", col=c( "pink", "purple"))
@@ -67,3 +68,92 @@ Data modification
     plot(a)
   
 ![](anime_episodes.png)
+
+
+
+    #Drawing the members variable
+    library(ggplot2)
+    g2 <- ggplot(anime, aes(x = rating, y = members, group = rating, col=rating))
+
+    # define the plot as a boxplot and draw it
+    g2 + geom_boxplot() + ylab("members") + ggtitle("Members by popularity")+ xlim(-1,2)
+
+
+![](mep_pop.png)
+    
+    #Code from the create_anime.R how the genre clusters were made
+    
+    #Making a genre matrix
+    genrematrix <- matrix(0, nrow(anime_), length(genres))
+    colnames(genrematrix) <- genres
+    for (i in 1:nrow(anime_)) {
+    genrematrix[i, ] <- genres %in% genreslist[[i]]
+    }
+    
+
+    #Making genres groups by clustering
+    set.seed(4125)
+    clusters <- kmeans(genrematrix, centers=7, nstart=30, iter.max=10000)
+    
+####Why the genres were made into cluster? 
+######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but genre I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
+####How the number of clusters was determined? 
+######I used kmeans function with nstart ( the number of random sets chosen) as 30, because 10 wasn't enough and set the iterations to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the 50 sample from each cluster seemed reasonably put in the same category. This method could be improved, but I don't know how to.
+
+    
+   
+    
+    #Drawing the genre_cluster variable
+    counts <- table(anime$rating, anime$genre_cluster)
+    barplot(counts , main="Genre clusters", xlab = "Purple = liked", col=c( "pink", "purple"))
+    
+![](gc.png)
+
+
+
+#Logistic regression
+###### In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables. 
+
+
+    #Making the model
+    m <- glm(rating ~ episodes+members+type+genre_cluster, data = anime, family = "binomial")
+    summary(m)
+    
+    # compute odds ratios (OR)
+    OR <- coef(m) %>% exp
+
+    # compute confidence intervals (CI)
+    CI <- confint(m) %>% exp
+    
+
+    # print out the odds ratios with their confidence intervals
+    cbind(OR, CI)
+
+    # predict() the probability of high_use
+    probabilities <- predict(m, type = "response")
+
+    # add the predicted probabilities to 'alc'
+    anime <- mutate(anime, probability = probabilities)
+
+    # use the probabilities to make a prediction of high_use
+    anime <- mutate(anime, prediction = anime$probability > .5)
+
+    # tabulate the target variable versus the predictions
+    table(rating = anime$rating, prediction = anime$probability > .5 )
+    
+    # define a loss function (average prediction error)
+    loss_func <- function(class, prob) {
+    n_wrong <- abs(class - prob) > 0.5
+    mean(n_wrong)
+    }
+
+    # compute the average number of wrong predictions in the (training) data
+    loss_func(anime$rating, anime$probability)
+
+    # K-fold cross-validation
+    library(boot)
+    cv <- cv.glm(data = anime, cost = loss_func, glmfit = m, K = 10)
+
+    # average number of wrong predictions in the cross validation
+    cv$delta[1]
+    

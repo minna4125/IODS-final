@@ -44,7 +44,7 @@ for (i in 1:nrow(anime_)) {
 }
 
 #Making genres groups by clustering
-
+set.seed(4125)
 clusters <- kmeans(genrematrix, centers=7, nstart=30, iter.max=10000)
 
 
@@ -66,8 +66,8 @@ glimpse(anime_gen)
 anime_gen$rating[anime_gen$rating < 7.5 ] <- "0"
 anime_gen$rating[anime_gen$rating == 7.5 ] <- "0"
 anime_gen$rating[anime_gen$rating > 7.5 ] <- "1"
-
-anime_gen$rating <- as.numeric(anime_gen$rating)
+anime_gen$rating[anime_gen$rating == 10 ]<- "1"
+anime_gen$rating <- as.factor(anime_gen$rating)
 
 #Changing the type form character to a factor
 anime_gen$type <- as.factor(anime_gen$type)
@@ -86,7 +86,7 @@ anime_gen <- select(anime_gen, -anime_id)
 glimpse(anime_gen)
 write.csv(anime_gen, "anime_gen")
 ##################
-m <- glm(rating ~ episodes+type+members+genre_cluster, data = anime_gen)
+m <- glm(rating ~ episodes+type+members+genre_cluster, data = anime_gen, family = "binomial")
 summary(m)
 
 
