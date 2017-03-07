@@ -13,9 +13,11 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(cache=TRUE)
 ```
+#Abstract
 
 #Research questions
-#####Can we predict if the anime is popular based on the variables?
+#####Can we predict if the anime is popular based on the number of episoeds, genres, members and type?
+#####My hypothesis is that more episodes and members makes the anime more likely to be liked. 
 
 ##Link to the R-script
 <https://github.com/minna4125/IODS-final/blob/master/create_anime.R>
@@ -31,7 +33,13 @@ Variables in the data:
 1.type is a factor variable which has values [Movie, TV, OVA, ONA, Special, TV]
 2.episodes, which is the number of episodes anime has.
 3.members is the number of people in the animes "fan group"
-4.genre_clusters is the number of cluster that the animes genres belong to [1-7].
+4.genre_clusters is the number of cluster that the animes genres belong to [1-5].
+  1.Fantasy animes
+  2.Horror/supernatural animes
+  3.Funny animes
+  4.Human relationships
+  5.Mystery/sci-fi animes
+  
 5.Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
 
 
@@ -69,7 +77,7 @@ Data modification
 ####Why the genres were made into cluster? 
 ######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but genre I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
 ####How the number of clusters was determined? 
-######I used kmeans function with nstart ( the number of random sets chosen) as 30, because 10 wasn't enough and set the iterations to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the 50 sample from each cluster seemed reasonably put in the same category. This method could be improved, but I don't know how to.
+######I used kmeans function with nstart ( the number of random sets chosen) as 30, because I don't know where the centers are and 10 guesses weren't enough in my opinion. the  iterations to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the 50 sample from each cluster seemed reasonably put in the same category. This method could be improved, but I don't know how to.
 ```{r, eval=TRUE}
 
     #Drawing the genre_cluster variable

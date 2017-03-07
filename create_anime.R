@@ -45,7 +45,7 @@
                       
   #Making genres groups by clustering
   set.seed(4125)                    
-  clusters <- kmeans(genrematrix, centers=7, nstart=30, iter.max=10000)
+  clusters <- kmeans(genrematrix, centers=5, nstart=30, iter.max=10000)
                       
                       
   #Combinin genre matrix with anime_ table to anime_gen  
@@ -53,8 +53,10 @@
                       
   #Checking
   glimpse(anime_gen)
-                      
-                      
+  #Determing how many clusters is good ( I read the genre combinations and stopped when they weren't getting any better)  
+  
+  table(anime_gen$genre[anime$genre_cluster == 1])
+  
   #Removing the genre  variable from the anime_gen
   anime_gen <- subset(anime_gen, select = -genre)
                       
@@ -88,4 +90,5 @@
                       
   glimpse(anime_gen)
   write.csv(anime_gen, "anime_gen")
-                 
+  m <- glm(rating~ type+genre_cluster+episodes+members)
+  summary(m)
