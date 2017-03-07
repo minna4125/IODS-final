@@ -111,7 +111,7 @@ Data modification
 
 
 
-#Logistic regression
+#Logistic regression model
 ###### In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables. 
 
 
@@ -119,29 +119,35 @@ Data modification
     m <- glm(rating ~ episodes+members+type+genre_cluster, data = anime, family = "binomial")
     summary(m)
     
-    # compute odds ratios (OR)
+    #Computing the odds ratios (OR)
     OR <- coef(m) %>% exp
 
-    # compute confidence intervals (CI)
+    #Computing the confidence intervals (CI)
     CI <- confint(m) %>% exp
     
 
-    # print out the odds ratios with their confidence intervals
+    #Printing out the odds ratios with their confidence intervals
     cbind(OR, CI)
 
-    # predict() the probability of high_use
+    #Predicting (with predict()) the probability of anime being liked
     probabilities <- predict(m, type = "response")
 
-    # add the predicted probabilities to 'alc'
+    #Adding the probabilities  to anime
     anime <- mutate(anime, probability = probabilities)
 
-    # use the probabilities to make a prediction of high_use
+    #Using the probabilities to make a prediction of anime being liked
     anime <- mutate(anime, prediction = anime$probability > .5)
 
-    # tabulate the target variable versus the predictions
+    #Tabulating the target variable vs. the predictions
     table(rating = anime$rating, prediction = anime$probability > .5 )
     
-    # define a loss function (average prediction error)
+    #Tabulating the target variable against the prediction
+    table(rating = anime$rating, prediction = anime$prediction) %>% prop.table()%>%       addmargins()
+
+
+
+    
+    #Making a loss function in another words the average prediction error
     loss_func <- function(class, prob) {
     n_wrong <- abs(class - prob) > 0.5
     mean(n_wrong)
@@ -150,10 +156,46 @@ Data modification
     # compute the average number of wrong predictions in the (training) data
     loss_func(anime$rating, anime$probability)
 
-    # K-fold cross-validation
+    #K-fold cross-validation
     library(boot)
     cv <- cv.glm(data = anime, cost = loss_func, glmfit = m, K = 10)
 
-    # average number of wrong predictions in the cross validation
+    #Average number of wrong predictions in the cross validation
     cv$delta[1]
+    library(dplyr)
     
+    
+    #Drawing the results
+    counts2 <- table(anime$rating, anime$prediction)
+    barplot(counts2 , main="Prediction vs. actual", xlab = "Black = wrong prediction", col=c( "yellow", "black"),beside = T)
+
+#Model validation
+
+![](summary_m.png)
+
+
+##Odds ratios with their confidence intervals
+![](or.png)
+
+## Cross tabulation
+![](ct.png)
+
+##
+
+
+![](cop.png)
+
+
+##Results
+
+![](pva.png)
+
+
+
+
+
+
+
+
+
+
