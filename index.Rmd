@@ -26,31 +26,30 @@ It orgins from myanimelist.net website.
 Data is about animes ratings in myanimelist.net.
 
 Variables in the data:
-1. type is a factor variable which has values [Movie, TV, OVA, ONA, Special, TV]
-2. episodes, which is the number of episodes anime has.
-3. members is the number of people in the animes "fan group"
-4. genre_clusters is the number of cluster that the animes genres belong to [1-7].
-5. Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
+1.type is a factor variable which has values [Movie, TV, OVA, ONA, Special, TV]
+2.episodes, which is the number of episodes anime has.
+3.members is the number of people in the animes "fan group"
+4.genre_clusters is the number of cluster that the animes genres belong to [1-7].
+5.Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
 
 
 Data modification
-  1. Animes with NA values were removed (such as animes with no genre or type)
-  2. 44 genres were reduced to 8 clusters 
-  3. Anime names were made to a rownames
-  4. Rating was made into a binomial variable
+  1.Animes with NA values were removed (such as animes with no genre or type)
+  2.44 genres were reduced to 8 clusters 
+  3.Anime names were made to a rownames
+  4.Rating was made into a binomial variable
   
 #Variables
-```{r, eval=FALSE}
+```{r, eval=TRUE}
     #Downloading the data
     anime <- read.csv("anime_gen")
 
-    #Removing empty values
-    anime <- filter(anime, complete.cases(anime))
     
     #Drawing the type variable
     counts <- table(anime$rating, anime$type)
     barplot(counts , main="Anime types", xlab = "Purple = liked", col=c( "pink", "purple"))
-```    
+  
+
     
     #Drawing the episodes variable
 
@@ -62,34 +61,34 @@ Data modification
     # define the plot as a boxplot and draw it
     g2 + geom_boxplot() + ylab("members") + ggtitle("Members by popularity")+ xlim(-1,2)
 
-    
-```
+```   
+
     
 ####Why the genres were made into cluster? 
 ######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but genre I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
 ####How the number of clusters was determined? 
 ######I used kmeans function with nstart ( the number of random sets chosen) as 30, because 10 wasn't enough and set the iterations to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the 50 sample from each cluster seemed reasonably put in the same category. This method could be improved, but I don't know how to.
+```{r, eval=TRUE}
+    
+    #Bubblegum fix
+    anime <- read.csv("anime_gen")
 
-    
-   
-    
     #Drawing the genre_cluster variable
     counts <- table(anime$rating, anime$genre_cluster)
     barplot(counts , main="Genre clusters", xlab = "Purple = liked", col=c( "pink", "purple"))
-    
-![](gc.png)
-
+```  
 
 
 #Logistic regression model
 ###### In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables. 
 
-```{r}
+
 
 
     #Making the model
     #Reading the file (yes, a bubble gum fix)
     anime <- read.csv("anime_gen")
+    anime <- filter(anime, complete.cases)
     
     #libraries
     library(dplyr)
@@ -145,33 +144,65 @@ Data modification
     #Drawing the results
     counts2 <- table(anime$rating, anime$prediction)
     barplot(counts2 , main="Prediction vs. actual", xlab = "Black = wrong prediction", col=c( "yellow", "black"),beside = T)
-```
+
 #Model validation
+ 
+```{r, eval=TRUE}
+    #Bubble gum fix
+    anime <- read.csv("anime_gen")
+    anime <- filter(anime, complete.cases(anime))
+    library(dplyr)
 
-![](summary_m.png)
+    #Making the model
+    m <- glm(rating ~ episodes+members+genre_cluster, data = anime, family = "binomial")
+    summary(m)
 
+    #Computing th odds ratios (OR)
+    OR <- coef(m) %>% exp
+    
+    #Computing the confidence intervals (CI)
+    CI <- confint(m) %>% exp
 
-##Odds ratios with their confidence intervals
-![](or.png)
+    #Printing out the odds ratios with their confidence intervals
+     cbind(OR, CI)
 
-## Cross tabulation
-![](ct.png)
+    #Predicting with predict() the probability of anime being liked (=1)
+    probabilities <- predict(m, type = "response")
 
-##
+     #Adding the predicted probabilities to 'anime'
+     anime <- mutate(anime, probability = probabilities)
+ 
+     #Using the probabilities to make a prediction of anime rating
+     anime <- mutate(anime, prediction = anime$probability > .5)
+ 
+     #Cross tabulating the target variable versus the predictions
+     table(rating = anime$rating, prediction = anime$probability > .5 )
+     
+     #Same with precentages
+     table(rating = anime$rating, prediction = anime$prediction) %>% prop.table()%>%       addmargins()
+     
+     
+     #Defining a loss function to calculate average prediction error
+     loss_func <- function(class, prob) {
+     n_wrong <- abs(class - prob) > 0.5
+     mean(n_wrong)
+     }
 
+    #Computing the average number of wrong predictions in the training data
+     loss_func(anime$rating, anime$probability)
+     
+    #K-fold cross-validation
+    library(boot)
+    cv <- cv.glm(data = anime, cost = loss_func, glmfit = m, K = 10)
+    
+    #Average number of wrong predictions in the cross validation
+     cv$delta[1]
+     
+    #Drawing the results 
+    counts2 <- table(anime$rating, anime$prediction)
+    barplot(counts2 , main="Prediction vs. actual", xlab = "Black = wrong prediction", col=c( "yellow", "black"),beside = T)
 
-![](cop.png)
-
-
-##Results
-
-![](pva.png)
-
-
-
-
-
-
+```
 
 
 
