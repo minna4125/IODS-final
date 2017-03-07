@@ -8,6 +8,7 @@ output:
   html_document:
     toc: true
     toc_float: true
+    code_folding: show
 ---
 
 
@@ -39,36 +40,19 @@ Data modification
   4. Rating was made into a binomial variable
   
 #Variables
-
+```{r, eval=FALSE}
     #Downloading the data
-    setwd("C:/Users/Minna/Documents/GitHub/IODS-final")
     anime <- read.csv("anime_gen")
+
     #Removing empty values
     anime <- filter(anime, complete.cases(anime))
+    
     #Drawing the type variable
     counts <- table(anime$rating, anime$type)
     barplot(counts , main="Anime types", xlab = "Purple = liked", col=c( "pink", "purple"))
+```    
     
-    
-![](anime_types2.png)
-
-
     #Drawing the episodes variable
-    library(ggplot2)
-    a <- anime %>% 
-    ggplot(aes(rating, episodes)) +
-    coord_cartesian(xlim = c(-1, 2))+
-    ggplot(aes(color = type)) +  geom_bar(aes(fill = cut))+
-    theme(axis.title.x=element_blank(),
-          axis.text.x=element_blank(),
-          axis.ticks.x=element_blank())
-    facet_wrap(~ type, scales = "free_y")
-    
-   
-    plot(a)
-  
-![](anime_episodes.png)
-
 
 
     #Drawing the members variable
@@ -78,22 +62,8 @@ Data modification
     # define the plot as a boxplot and draw it
     g2 + geom_boxplot() + ylab("members") + ggtitle("Members by popularity")+ xlim(-1,2)
 
-
-![](mep_pop.png)
     
-    #Code from the create_anime.R how the genre clusters were made
-    
-    #Making a genre matrix
-    genrematrix <- matrix(0, nrow(anime_), length(genres))
-    colnames(genrematrix) <- genres
-    for (i in 1:nrow(anime_)) {
-    genrematrix[i, ] <- genres %in% genreslist[[i]]
-    }
-    
-
-    #Making genres groups by clustering
-    set.seed(4125)
-    clusters <- kmeans(genrematrix, centers=7, nstart=30, iter.max=10000)
+```
     
 ####Why the genres were made into cluster? 
 ######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but genre I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
@@ -114,8 +84,15 @@ Data modification
 #Logistic regression model
 ###### In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables. 
 
+```{r}
+
 
     #Making the model
+    #Reading the file (yes, a bubble gum fix)
+    anime <- read.csv("anime_gen")
+    
+    #libraries
+    library(dplyr)
     m <- glm(rating ~ episodes+members+type+genre_cluster, data = anime, family = "binomial")
     summary(m)
     
@@ -168,7 +145,7 @@ Data modification
     #Drawing the results
     counts2 <- table(anime$rating, anime$prediction)
     barplot(counts2 , main="Prediction vs. actual", xlab = "Black = wrong prediction", col=c( "yellow", "black"),beside = T)
-
+```
 #Model validation
 
 ![](summary_m.png)

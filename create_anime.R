@@ -84,10 +84,12 @@ anime_gen <- select(anime_gen, -anime_id)
 
 
 glimpse(anime_gen)
+
+#Removing empty values
+anime_gen <- filter(anime, complete.cases(anime_gen))
 write.csv(anime_gen, "anime_gen")
-##################
-m <- glm(rating ~ episodes+type+members+genre_cluster, data = anime_gen, family = "binomial")
-summary(m)
+
+
 
 
 
