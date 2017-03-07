@@ -245,6 +245,8 @@ div.tocify {
 <pre><code>#Downloading the data
 setwd(&quot;C:/Users/Minna/Documents/GitHub/IODS-final&quot;)
 anime &lt;- read.csv(&quot;anime_gen&quot;)
+#Removing empty values
+anime &lt;- filter(anime, complete.cases(anime))
 #Drawing the type variable
 counts &lt;- table(anime$rating, anime$type)
 barplot(counts , main=&quot;Anime types&quot;, xlab = &quot;Purple = liked&quot;, col=c( &quot;pink&quot;, &quot;purple&quot;))</code></pre>
@@ -314,8 +316,49 @@ barplot(counts , main=&quot;Genre clusters&quot;, xlab = &quot;Purple = liked&qu
 </div>
 <div id="logistic-regression" class="section level1">
 <h1>Logistic regression</h1>
-<div id="in-this-case-model-tries-to-predict-wether-certain-anime-belongs-to-the-category-of-liked-1-or-not-liked-0-based-on-the-explanotory-variables." class="section level4">
-<h4>In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables.</h4>
+<div id="in-this-case-model-tries-to-predict-wether-certain-anime-belongs-to-the-category-of-liked-1-or-not-liked-0-based-on-the-explanotory-variables." class="section level6">
+<h6>In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables.</h6>
+<pre><code>#Making the model
+m &lt;- glm(rating ~ episodes+members+type+genre_cluster, data = anime, family = &quot;binomial&quot;)
+summary(m)
+
+# compute odds ratios (OR)
+OR &lt;- coef(m) %&gt;% exp
+
+# compute confidence intervals (CI)
+CI &lt;- confint(m) %&gt;% exp
+
+
+# print out the odds ratios with their confidence intervals
+cbind(OR, CI)
+
+# predict() the probability of high_use
+probabilities &lt;- predict(m, type = &quot;response&quot;)
+
+# add the predicted probabilities to 'alc'
+anime &lt;- mutate(anime, probability = probabilities)
+
+# use the probabilities to make a prediction of high_use
+anime &lt;- mutate(anime, prediction = anime$probability &gt; .5)
+
+# tabulate the target variable versus the predictions
+table(rating = anime$rating, prediction = anime$probability &gt; .5 )
+
+# define a loss function (average prediction error)
+loss_func &lt;- function(class, prob) {
+n_wrong &lt;- abs(class - prob) &gt; 0.5
+mean(n_wrong)
+}
+
+# compute the average number of wrong predictions in the (training) data
+loss_func(anime$rating, anime$probability)
+
+# K-fold cross-validation
+library(boot)
+cv &lt;- cv.glm(data = anime, cost = loss_func, glmfit = m, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]</code></pre>
 </div>
 </div>
 
