@@ -53,7 +53,7 @@ Data modification
 ```{r, eval=TRUE}
     #Downloading the data
     anime <- read.csv("anime_gen")
-
+    str(anime)
     
     #Drawing the type variable
     counts <- table(anime$rating, anime$type)

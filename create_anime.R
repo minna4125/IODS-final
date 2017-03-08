@@ -94,5 +94,6 @@
                       
                       
   glimpse(anime_gen)
+  str(anime_gen)
   write.csv(anime_gen, "anime_gen")
   
