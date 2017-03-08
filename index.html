@@ -267,7 +267,7 @@ div.tocify {
 <div id="variables" class="section level1">
 <h1>Variables</h1>
 <pre class="r"><code>    #Downloading the data
-    anime &lt;- read.csv(&quot;anime_gen&quot;)
+    anime &lt;- read.csv(&quot;anime_gen2&quot;)
     str(anime)</code></pre>
 <pre><code>## 'data.frame':    11830 obs. of  7 variables:
 ##  $ X            : int  1 2 3 4 5 6 7 8 9 10 ...
@@ -492,7 +492,7 @@ barplot(counts2 , main=&quot;Prediction vs. actual&quot;, xlab = &quot;Black = w
     
     #Average number of wrong predictions in the cross validation
      cv$delta[1]</code></pre>
-<pre><code>## [1] 0.1154691</code></pre>
+<pre><code>## [1] 0.115131</code></pre>
 <pre class="r"><code>    #Drawing the results 
     counts2 &lt;- table(anime$rating, anime$prediction)
     barplot(counts2 , main=&quot;Prediction vs. actual&quot;, xlab = &quot;Black = wrong prediction&quot;, col=c( &quot;yellow&quot;, &quot;black&quot;),beside = T)</code></pre>

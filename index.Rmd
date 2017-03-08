@@ -52,7 +52,7 @@ Data modification
 #Variables
 ```{r, eval=TRUE}
     #Downloading the data
-    anime <- read.csv("anime_gen")
+    anime <- read.csv("anime_gen2")
     str(anime)
     
     #Drawing the type variable
