@@ -45,8 +45,8 @@ Variables in the data:
 
 Data modification
   1.Animes with NA values were removed (such as animes with no genre or type)
-  2.44 genres were reduced to 8 clusters 
-  3.Anime names were made to a rownames
+  2.44 genres were reduced to 5 clusters 
+  3.Anime_ids were made to a rownames
   4.Rating was made into a binomial variable
   
 #Variables
@@ -75,9 +75,9 @@ Data modification
 
     
 ####Why the genres were made into cluster? 
-######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but genre I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
+######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
 ####How the number of clusters was determined? 
-######I used kmeans function with nstart ( the number of random sets chosen) as 30, because I don't know where the centers are and 10 guesses weren't enough in my opinion. the  iterations to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the 50 sample from each cluster seemed reasonably put in the same category. This method could be improved, but I don't know how to.
+######I used kmeans function with nstart ( the number of random sets chosen) as 30, because I don't know where the centers are and 10 guesses weren't enough in my opinion. The  iterations was set to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the genre combinations in each cluster seemed reasonable enough.
 ```{r, eval=TRUE}
 
     #Drawing the genre_cluster variable
@@ -173,6 +173,7 @@ Data modification
 
 
 ##Model validation with odd ratios and their intervals
+####From the oddsratios can be seen that
 ```{r, eval=TRUE}
     #Computing th odds ratios (OR)
     OR <- coef(m) %>% exp
