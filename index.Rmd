@@ -18,7 +18,7 @@ knitr::opts_chunk$set(cache=TRUE)
 
 #Research questions
 #####Can we predict if the anime is popular based on the number of episoeds, genres, members and type?
-#####My hypothesis is that more episodes and members makes the anime more likely to be liked. 
+#####My hypothesis is that more episodes and members makes the anime more likely to be liked. Mystery/sci-fi - genre animes would be the most liked ones.
 
 ##Link to the R-script
 <https://github.com/minna4125/IODS-final/blob/master/create_anime.R>
@@ -213,5 +213,5 @@ Data modification
 
 ```    
 
-#####This model would suggest that human relationship animes are the most popular ones. The clustering of the anime genres has room for an improvment, because it doesn't catch all the finest diffrences between animes. Also, the relationship between episodes and ranking might not be so simple. GLM doesn't like factors, so the type variable coud be dealed with some other way.
+#####This model would suggest that human relationship animes are the most popular ones. The clustering of the anime genres has room for an improvment, because it doesn't catch all the finest diffrences between animes. Also, the relationship between episodes and ranking might not be so simple. GLM doesn't like factors, so the type variable coud be dealed with some other way. More members did correlate positively with anime being liked, but mystery/sci-fi animes weren't the most popular ones.
 
