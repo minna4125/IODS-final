@@ -1,9 +1,8 @@
 
 ---
 title: "Predicting anime rating with logistic regression"
-author: "Minna Peralampi"
+author: "Minna Peralampi: minna.peralampi@helsinki.fi"
 date: "8.3.2017"
-email: "minna.peralampi@helsinki.fi"
 output:
   html_document:
     toc: true
@@ -158,7 +157,7 @@ Data modification
     #Printing out the odds ratios with their confidence intervals
      cbind(OR, CI)
 ```
-#####From the oddratios we can conclude that positive effect on anime being liked is genre clusters 3,4 and 5 (Funny -, human relationships-, and mystery/sci-fi animes).Also the number of members and episodes have an positive effect. Other variables have negative effect.
+#####From the oddratios we can conclude that positive effect on anime being liked is genre_clusters (4, from the earlier variable look), members and episodes. 
 
 ##Model validation with cross tabulations
 
@@ -214,5 +213,5 @@ Data modification
 
 ```    
 
-####This model would suggest that human relationship animes are the most popular ones. The clustering of the anime genres has room for an improvment, because it doesn't catch all the finest diffrences between animes. Also, the relationship between episodes and ranking might not be so simple. GLM doesn't like factors, so the type variable coud be dealed with some other way.
+#####This model would suggest that human relationship animes are the most popular ones. The clustering of the anime genres has room for an improvment, because it doesn't catch all the finest diffrences between animes. Also, the relationship between episodes and ranking might not be so simple. GLM doesn't like factors, so the type variable coud be dealed with some other way.
 
