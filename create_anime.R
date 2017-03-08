@@ -74,9 +74,14 @@
                       
   #Changing the type form character to a factor
   anime_gen$type <- as.factor(anime_gen$type)
-                      
+  
+  #Changing genre_cluster into a factor variable
+  a <- factor(anime_gen$genre_cluster)
+  anime_gen$genre_cluster <- a
+                    
   #changing episodes from charactor to numeric
   anime_gen$episodes <- as.numeric(anime_gen$episodes)
+  
   #Fixing NA's
   anime_gen <- anime_gen[!is.na(anime_gen$episodes), ]
   
@@ -90,5 +95,4 @@
                       
   glimpse(anime_gen)
   write.csv(anime_gen, "anime_gen")
-  m <- glm(rating~ type+genre_cluster+episodes+members)
-  summary(m)
+  
