@@ -374,72 +374,21 @@ div.tocify {
 <h1>Logistic regression model</h1>
 <div id="in-this-case-model-tries-to-predict-wether-certain-anime-belongs-to-the-category-of-liked-1-or-not-liked-0-based-on-the-explanotory-variables." class="section level6">
 <h6>In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables.</h6>
-<pre><code>#Making the model
-#Reading the file (yes, a bubble gum fix)
-anime &lt;- read.csv(&quot;anime_gen&quot;)
-anime &lt;- filter(anime, complete.cases)
-
-#libraries
-library(dplyr)
-m &lt;- glm(rating ~ episodes+members+type+genre_cluster, data = anime, family = &quot;binomial&quot;)
-summary(m)
-
-#Computing the odds ratios (OR)
-OR &lt;- coef(m) %&gt;% exp
-
-#Computing the confidence intervals (CI)
-CI &lt;- confint(m) %&gt;% exp
-
-
-#Printing out the odds ratios with their confidence intervals
-cbind(OR, CI)
-
-#Predicting (with predict()) the probability of anime being liked
-probabilities &lt;- predict(m, type = &quot;response&quot;)
-
-#Adding the probabilities  to anime
-anime &lt;- mutate(anime, probability = probabilities)
-
-#Using the probabilities to make a prediction of anime being liked
-anime &lt;- mutate(anime, prediction = anime$probability &gt; .5)
-
-#Tabulating the target variable vs. the predictions
-table(rating = anime$rating, prediction = anime$probability &gt; .5 )
-
-#Tabulating the target variable against the prediction
-table(rating = anime$rating, prediction = anime$prediction) %&gt;% prop.table()%&gt;%       addmargins()
-
-
-
-
-#Making a loss function in another words the average prediction error
-loss_func &lt;- function(class, prob) {
-n_wrong &lt;- abs(class - prob) &gt; 0.5
-mean(n_wrong)
-}
-
-# compute the average number of wrong predictions in the (training) data
-loss_func(anime$rating, anime$probability)
-
-#K-fold cross-validation
-library(boot)
-cv &lt;- cv.glm(data = anime, cost = loss_func, glmfit = m, K = 10)
-
-#Average number of wrong predictions in the cross validation
-cv$delta[1]
-library(dplyr)
-
-
-#Drawing the results
-counts2 &lt;- table(anime$rating, anime$prediction)
-barplot(counts2 , main=&quot;Prediction vs. actual&quot;, xlab = &quot;Black = wrong prediction&quot;, col=c( &quot;yellow&quot;, &quot;black&quot;),beside = T)</code></pre>
 </div>
 </div>
 <div id="making-the-model-and-validating-it" class="section level1">
 <h1>Making the model and validating it</h1>
 <pre class="r"><code>    #Adding libraries
-    library(dplyr)
-    library(tidyr)
+    library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: 'dplyr'</code></pre>
+<pre><code>## The following objects are masked from 'package:stats':
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>    library(tidyr)
 
     #Making the model
     m &lt;- glm(rating ~ episodes+members+genre_cluster+type+0, data = anime, family = &quot;binomial&quot;)
@@ -550,7 +499,7 @@ barplot(counts2 , main=&quot;Prediction vs. actual&quot;, xlab = &quot;Black = w
     
     #Average number of wrong predictions in the cross validation
      cv$delta[1]</code></pre>
-<pre><code>## [1] 0.1154691</code></pre>
+<pre><code>## [1] 0.115131</code></pre>
 <div id="training-error-is-less-than-12-so-the-model-works-pretty-well." class="section level5">
 <h5>Training error is less than 12 %, so the model works pretty well.</h5>
 </div>
