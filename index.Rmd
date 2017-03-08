@@ -1,6 +1,6 @@
 
 ---
-title: "Anime recomendation with clustering and MCA analysis"
+title: "Predicting anime rating with logistic regression"
 author: "Minna Peralampi"
 date: "8.3.2017"
 email: "minna.peralampi@helsinki.fi"
@@ -10,10 +10,12 @@ output:
     toc_float: true
     code_folding: show
 ---
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, warning=FALSE}
 knitr::opts_chunk$set(cache=TRUE)
 ```
 #Abstract
+
+#######In this analysis we will predict anime rating based on genre, members, number of episodes and anime type. First we look into the variables, then we make the model and validate it with odds ratios and cross tabulation.
 
 #Research questions
 #####Can we predict if the anime is popular based on the number of episoeds, genres, members and type?
@@ -29,18 +31,23 @@ knitr::opts_chunk$set(cache=TRUE)
 It orgins from myanimelist.net website.
 Data is about animes ratings in myanimelist.net.
 
-Variables in the data:
-1.type is a factor variable which has values [Movie, TV, OVA, ONA, Special, TV]
-2.episodes, which is the number of episodes anime has.
-3.members is the number of people in the animes "fan group"
-4.genre_clusters is the number of cluster that the animes genres belong to [1-5].
-  1.Fantasy animes
-  2.Horror/supernatural animes
-  3.Funny animes
-  4.Human relationships
-  5.Mystery/sci-fi animes
-  
-5.Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
+#####Variables in the data:
+  1. Type is a factor variable which has values
+    1. Movie 
+    2. TV
+    3. OVA (Orginal video animations, made for home release) 
+    4. ONA (Orginal net animations, made for internet release)
+    5. Special
+    
+  2. Episodes, which is the number of episodes anime has.
+  3. Members is the number of people in the animes "fan group"
+  4. Genre_clusters is the number of cluster that the animes genres belong to [1-5].
+    1. Fantasy animes
+    2. Horror/supernatural animes
+    3. Funny animes
+    4. Human relationships
+    5. Mystery/sci-fi animes
+  5. Rating, an numeric variable with values 0, if the rating is equal or under 7.5/10 and 1 if it is over
 
 
 Data modification
@@ -50,41 +57,75 @@ Data modification
   4.Rating was made into a binomial variable
   
 #Variables
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
     #Downloading the data
-    anime <- read.csv("anime_gen2")
+    anime <- read.csv("anime_gen", stringsAsFactors = F)
+    
+    #Changing the type variable to factor (=fixing an evil elf problem)
+    anime$type <- as.factor(anime$type)
+    #Checking the structure of the data
     str(anime)
+```
+
+
+
+```{r, eval=TRUE, warning=FALSE}
+    
     
     #Drawing the type variable
     counts <- table(anime$rating, anime$type)
-    barplot(counts , main="Anime types", xlab = "Purple = liked", col=c( "pink", "purple"))
-  
+    barplot(counts , main="Anime types", xlab = "Purple = liked", col=c( "pink", "purple"), beside = T)
+    
+    #Printing out the numbers
+    counts
+```
+######TV and Movie types are the most popular (=more out of them is being liked) than the others.
+
+```{r, eval=TRUE, warning=FALSE}
+    #Adding library
+    library(ggplot2)
 
     
     #Drawing the episodes variable
+    g2 <- ggplot(anime, aes(x = rating, y = episodes, group = rating, col=rating))
+    
+    #Defining the plot as a boxplot and drawing it
+    g2 + geom_boxplot() + ylab("episodes") + ggtitle("Episodes by popularity")+ xlim(-1,2)
 
+    #Defining the plot as a boxplot and drawing it with limited y axis
+    g2 + geom_boxplot() + ylab("episodes") + ggtitle("Episodes by popularity (limited y-axe)")+ xlim(-1,2)+ylim(0,250)
+```
+
+######Dissliked anime has more animes at the over 1000 episodes. From this we could say that people don't generally like animes that are made longer and longer and longer. In most cases popular animes have more episodes than the dissliked animes, but it does seem to have a limit how many episodes anime can have and still be liked.
+
+
+```{r, eval=TRUE, warning=FALSE}
 
     #Drawing the members variable
-    library(ggplot2)
     g2 <- ggplot(anime, aes(x = rating, y = members, group = rating, col=rating))
 
-    # define the plot as a boxplot and draw it
+    #Defining the plot as a boxplot and drawing it
     g2 + geom_boxplot() + ylab("members") + ggtitle("Members by popularity")+ xlim(-1,2)
 
 ```   
 
+######Animes, that have more members are being liked more often than animes with less members.
     
 ####Why the genres were made into cluster? 
 ######There was 44 diffrent genres in the data and over 2000 unique combination of these. It is too much variables to be used in this model, but I find genre to be one of the key elements in determing if the anime is being liked or not. So I decided to group these 2000 genres in reasonable amount of groups by clustering.
 ####How the number of clusters was determined? 
 ######I used kmeans function with nstart ( the number of random sets chosen) as 30, because I don't know where the centers are and 10 guesses weren't enough in my opinion. The  iterations was set to 10000 so it was enough too. Then I relied on human inteligence in valuing the number of clusters. I increased the number of clusters untill the genre combinations in each cluster seemed reasonable enough.
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
 
     #Drawing the genre_cluster variable
     counts <- table(anime$rating, anime$genre_cluster)
-    barplot(counts , main="Genre clusters", xlab = "Purple = liked", col=c( "pink", "purple"))
+    barplot(counts , main="Genre clusters", xlab = "Green = liked", col=c( "light blue", "light green"), beside = T)
+    
+    #Printing out the numbers
+    counts
 ```  
 
+######The human relationship (4) animes seem to be the most popular ones.
 
 #Logistic regression model
 ###### In this case, model tries to predict wether certain anime belongs to the category of liked (1) or not liked (0) based on the explanotory variables. 
@@ -158,24 +199,21 @@ Data modification
 
 ```{r, eval=TRUE, warning=FALSE}
 
-
-   
     #Adding libraries
     library(dplyr)
     library(tidyr)
-    
-  
 
     #Making the model
-    m <- glm(rating ~ episodes+members+genre_cluster+type, data = anime, family = "binomial")
+    m <- glm(rating ~ episodes+members+genre_cluster+type+0, data = anime, family = "binomial")
     summary(m)
 ```
+#####From this summary we can quite safely assume that all the explanotory variables do affect the rating.
 
 
 ##Model validation with odd ratios and their intervals
 ####From the oddsratios can be seen that
-```{r, eval=TRUE}
-    #Computing th odds ratios (OR)
+```{r, eval=TRUE, warning=FALSE}
+    #Computing th odds ratios (OR).
     OR <- coef(m) %>% exp
 
     #Computing the confidence intervals (CI)
@@ -184,10 +222,11 @@ Data modification
     #Printing out the odds ratios with their confidence intervals
      cbind(OR, CI)
 ```
+#####From the oddratios we can conclude that positive effect on anime being liked is genre clusters 3,4 and 5 (Funny -, human relationships-, and mystery/sci-fi animes).Also the number of members and episodes have an positive effect. Other variables have negative effect.
 
 ##Model validation with cross tabulations
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
     #Predicting with predict() the probability of anime being liked (=1)
     probabilities <- predict(m, type = "response")
 
@@ -202,12 +241,12 @@ Data modification
      table(rating = anime$rating, prediction = anime$probability > .5 )
      
      #Same with precentages
-     table(rating = anime$rating, prediction = anime$prediction) %>% prop.table()%>%       addmargins()
+     table(rating = anime$rating, prediction = anime$prediction) %>% prop.table()%>%addmargins()
 ```
-
+##### The model makes false positives a lot, but it predicts animes rating pretty well.
 ##Over all error of the model
 
-```{r, eval=TRUE}
+```{r, eval=TRUE, warning=FALSE}
      
      #Defining a loss function to calculate average prediction error
      loss_func <- function(class, prob) {
@@ -224,7 +263,13 @@ Data modification
     
     #Average number of wrong predictions in the cross validation
      cv$delta[1]
-     
+
+```
+#####Training error is less than 12 %, so the model works pretty well. 
+
+#Conclusion and discussion
+
+```{r, eval=TRUE, warning=FALSE}
     #Drawing the results 
     counts2 <- table(anime$rating, anime$prediction)
     barplot(counts2 , main="Prediction vs. actual", xlab = "Black = wrong prediction", col=c( "yellow", "black"),beside = T)
@@ -233,5 +278,5 @@ Data modification
 
 ```    
 
-
+####This model would suggest that human relationship animes are the most popular ones. The clustering of the anime genres has room for an improvment, because it doesn't catch all the finest diffrences between animes. Also, the relationship between episodes and ranking might not be so simple. GLM doesn't like factors, so the type variable coud be dealed with some other way.
 
